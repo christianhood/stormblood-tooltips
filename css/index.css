@@ -1,0 +1,29 @@
+
+.ability {
+    background-color: #555; 
+    color: #eee; 
+    border-radius: 10px; 
+    padding: 10px 20px;
+    max-width: 500px;
+    margin: 15px;
+}
+
+.ability h1,h2,h3,h4 {
+    display: inline;
+}
+
+.info {
+    color: #bbb;
+}
+
+.id {
+    color: #999;
+}
+
+.cast {
+    color: #bbb; text-align: right; padding-left: 40px;
+}
+
+.recast {
+    color: #bbb; text-align: right; padding-left: 20px;
+}
