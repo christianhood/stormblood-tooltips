@@ -1,7 +1,9 @@
+var loaderHtml = '<center style="max-width: 550px; margin-top: 10px"><div class="loader"></div></center>';
 function loadActions(name = "") {
     $('.actionRow').remove();
 
     $("#main").append("<div id='actionRow' class='row actionRow'></div>");
+    $("#actionRow").append(loaderHtml);
     actions.forEach(function (action, index) {
         if (name) {
             if (!action.Name.toLowerCase().includes(name.toLowerCase())) {
@@ -19,12 +21,15 @@ function loadActions(name = "") {
         element.html(eleHtml);
         element.show();
     });
+    $('.loader').remove();
 }
 
 function loadTraits(name = "") {
     $('.actionRow').remove();
 
     $("#main").append("<div id='actionRow' class='row actionRow'></div>");
+    $("#actionRow").append(loaderHtml);
+    
     traits.forEach(function (action, index) {
         if (name) {
             if (!action.Name.toLowerCase().includes(name)) {
@@ -42,4 +47,5 @@ function loadTraits(name = "") {
         element.html(eleHtml);
         element.show();
     });
+    $('.loader').remove();
 }
