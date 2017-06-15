@@ -1,4 +1,6 @@
 ﻿using CsvHelper;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,54 +12,35 @@ namespace TooltipMaker
 {
     class Program
     {
-        static string file = "Actions.csv";
-        static string traitsFile = "Traits.csv";
+        static string file = "Data\\Actions.csv";
+        static string traitsFile = "Data\\Traits.csv";
         static void Main(string[] args)
         {
-            var actionsHtml = generateActions();
-            var traitsHtml = generateTraits();
+            generateActions();
+            generateTraits();
+            Console.WriteLine("Done!");
             Console.Read();
 
         }
 
-        static string generateTraits()
+        static void generateTraits()
         {
             List<Trait> traits;
-            string fullHtml = "";
             using (var textReader = File.OpenText(Path.Combine(Directory.GetCurrentDirectory(), traitsFile)))
             {
                 var csv = new CsvReader(textReader);
                 traits = csv.GetRecords<Trait>().ToList();
             }
 
-            string htmlTemplate = "<div class='ability container'><div class='row'><h3>{0}</h3></div>" +
-                "<div class='row'>" +
-                    "<span class='info col-xs-3' >Trait</span>" +
-                "</div>" +
-                "<hr />" +
-                "<div class='row'>" +
-                    "<div class='col-md-12'>" +
-                        "<p>{1}</p>" +
-                    "</div>" +
-                "</div>" +
-                "<div class='row'>" +
-                    "<div class='col-md-12'>" +
-                        "Level: {2}" +
-                        "<br />Class/Job: {3}" +
-                    "</div>" +
-                "</div>" +
-            "</div>";
+            string json = JsonConvert.SerializeObject(traits);
 
-            foreach (var trait in traits)
+            using (var writer = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "traits.json")))
             {
-                fullHtml += string.Format(htmlTemplate, trait.Name, trait.Description, trait.Level, trait.ClassJob);
+                writer.Write(json);
             }
-
-
-            return fullHtml;
         }
 
-        static string generateActions()
+        static void generateActions()
         {
             List<Action> actions;
             using (var textReader = File.OpenText(Path.Combine(Directory.GetCurrentDirectory(), file)))
@@ -66,32 +49,7 @@ namespace TooltipMaker
                 actions = csv.GetRecords<Action>().ToList();
             }
 
-            string htmlTemplate = "<div class='ability container'><div class='row'><h3>{0}</h3></div>" +
-                "<div class='row'>" +
-                    "<span class='info col-xs-3' >{1}</span>" +
-                    "<span class='col-xs-3' ></span>" +
-                    "<span class='info col-xs-3'>Range: ??</span>" +
-                    "<span class='info col-xs-3'>Radius: ??</span>" +
-                "</div>" +
-                "<div class='row'>" +
-                    "<div class='col-xs-1'></div>" +
-                    "<div class='col-xs-5'>" +
-                        "<h3><small class='cast'>Cast</small><br/>??</h3>" +
-                    "</div>" +
-                    "<div class='col-xs-5'>" +
-                        "<h3><small class='recast'>Recast</small><br/>{2}s</h3>" +
-                    "</div>" +
-                    "<div class='col-xs-1'></div>" +
-                "</div>" +
-                "<hr />" +
-                "<div class='row'>" +
-                    "<div class='col-md-12'>" +
-                        "<p>{3}</p>" +
-                    "</div>" +
-                "</div>" +
-            "</div>";
-
-            var fullHtml = "";
+            JArray actionsArray = new JArray();
             foreach (var action in actions)
             {
                 var desc = action.Description;
@@ -138,14 +96,19 @@ namespace TooltipMaker
                 desc = desc.Replace("</If>", "&lt;/If&gt;");
                 desc = desc.Replace("<Else/>", "&lt;Else/&gt;");
 
-
-                fullHtml += string.Format(htmlTemplate, action.Name, action.Category, ((float)action.Cooldown / 10).ToString("0.00"), desc);
-
+                JObject a = new JObject();
+                a["ID"] = action.ID;
+                a["Name"] = action.Name;
+                a["Category"] = action.Category;
+                a["Cooldown"] = ((float)action.Cooldown / 10).ToString("0.00");
+                a["Description"] = desc;
+                actionsArray.Add(a);
             }
 
-            return fullHtml;
-
-
+            using (var writer = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "actions.json"), false))
+            {
+                writer.Write(actionsArray.ToString(Formatting.None));
+            }
         }
     }
 }
